@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <title>100 天泰文 A1 學習計劃 打卡與單字庫</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    :root{
+      --bg:#f5f7fa; --card:#fff; --accent:#2c7be5; --muted:#6b7280; --success:#16a34a;
+    }
+    body{font-family:"Microsoft JhengHei",system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--bg); margin:0; padding:20px; color:#0f172a}
+    header{text-align:center;margin-bottom:14px}
+    h1{margin:6px 0;font-size:20px}
+    .lead{margin:0;color:var(--muted)}
+    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:16px}
+    .card{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .progress{flex:1;min-width:180px}
+    .progress-bar{background:#e6eefc;border-radius:999px;height:12px;overflow:hidden}
+    .progress-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#6c5ce7);width:0%;transition:width .25s}
+    .btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+    .btn.ghost{background:#fff;color:var(--accent);border:1px solid #dbeafe}
+    .table-wrap{overflow:auto;max-height:56vh;border-radius:8px;border:1px solid #eef2ff}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left;white-space:nowrap}
+    th{background:#f8fafc;color:#0f172a;position:sticky;top:0;z-index:2}
+    tr.done td{background:rgba(22,163,74,0.04)}
+    .day{width:72px;font-weight:600}
+    .task{min-width:420px}
+    .checkbox{width:60px;text-align:center}
+    .small{font-size:13px;color:var(--muted)}
+    /* 右側單字區 */
+    .vcard{display:flex;flex-direction:column;gap:10px}
+    .form-row{display:flex;gap:8px}
+    input[type="text"], select, textarea{padding:8px;border-radius:8px;border:1px solid #e6eefc;flex:1}
+    textarea{resize:vertical;min-height:60px}
+    .word-list{max-height:46vh;overflow:auto;border-radius:8px;border:1px solid #eef2ff;padding:8px;background:#fff}
+    .word-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border-bottom:1px solid #f3f6fb}
+    .word-item:last-child{border-bottom:none}
+    .word-main{font-weight:700}
+    .word-sub{font-size:13px;color:var(--muted)}
+    .word-actions{margin-left:auto;display:flex;gap:6px}
+    .pill{background:#eef2ff;color:var(--accent);padding:4px 8px;border-radius:999px;font-size:12px}
+    .search{padding:8px;border-radius:8px;border:1px solid #e6eefc;min-width:160px}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr;}.table-wrap{max-height:40vh}.word-list{max-height:30vh}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>100 天泰文 A1 學習計劃 — 打卡與單字庫</h1>
+    <p class="lead">每日打卡 + 記錄你學到的泰文字（詞義、備註），資料會儲存在本機瀏覽器</p>
+  </header>
+
+  <div class="wrap">
+    <!-- 左側：計劃表 -->
+    <div class="card">
+      <div class="controls">
+        <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress-bar" aria-hidden="true" title="進度">
+              <i id="progressBar"></i>
+            </div>
+            <div class="small" id="progressText">0 / 100 完成</div>
+          </div>
+        </div>
+        <button class="btn" id="markAll">全部標為完成</button>
+        <button class="btn ghost" id="clearAll">全部重設</button>
+        <input id="searchInput" class="search" placeholder="搜尋 Day 或 任務關鍵字">
+      </div>
+
+      <div class="table-wrap">
+        <table id="planTable" aria-label="100 天計劃表">
+          <thead>
+            <tr>
+              <th class="day">Day</th>
+              <th class="task">任務內容</th>
+              <th class="checkbox">完成 ✔</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:12px;flex-wrap:wrap">
+        <div class="small" id="lastSaved">尚未儲存</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="small">已完成 <strong id="doneCount">0</strong> 天</div>
+          <div class="small">剩餘 <strong id="leftCount">100</strong> 天</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側：單字庫 -->
+    <aside class="card vcard" aria-label="單字庫">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <strong>單字庫</strong>
+          <div class="small">新增 / 檢視 / 編輯 / 刪除你學到的字</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="pill" id="totalWords">0 字</div>
+        </div>
+      </div>
+
+      <!-- 新增表單 -->
+      <div>
+        <div class="form-row" style="margin-bottom:8px">
+          <select id="selectDay" title="選擇 Day">
+            <!-- JS 產生 1-100 -->
+          </select>
+          <input id="inputThai" type="text" placeholder="泰文單字（必填）">
+        </div>
+        <div class="form-row" style="margin-bottom:8px">
+          <input id="inputMeaning" type="text" placeholder="中文或英文詞義（選填）">
+        </div>
+        <div style="margin-bottom:8px">
+          <textarea id="inputNote" placeholder="備註（發音、例句、來源）"></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="addWordBtn">新增到單字庫</button>
+          <button class="btn ghost" id="clearForm">清除欄位</button>
+          <input id="wordSearch" class="search" placeholder="搜尋單字或備註">
+        </div>
+      </div>
+
+      <!-- 單字列表 -->
+      <div class="word-list" id="wordList" aria-live="polite">
+        <!-- JS 產生單字項目 -->
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="small">顯示 Day <span id="currentDayLabel">1</span> 的單字</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" id="showAllWords">顯示全部</button>
+          <button class="btn ghost" id="deleteAllWords">刪除全部單字</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // ---------- 計劃表任務產生 ----------
+    const taskRanges = [
+      {from:1,to:5, text:"學 5 個子音，練筆順 + 聽音檔"},
+      {from:6,to:10, text:"學 5 個子音，練習組合音"},
+      {from:11,to:15, text:"學 5 個母音，練習發音"},
+      {from:16,to:20, text:"熟悉 5 種聲調，練習打招呼與自我介紹"},
+      {from:21,to:25, text:"學數字 1–100，練習問時間"},
+      {from:26,to:30, text:"數字與時間練習，造句表示時間"},
+      {from:31,to:35, text:"家庭成員詞彙，造句我有/沒有..."},
+      {from:36,to:40, text:"日常動詞（吃、去、看），造句練習"},
+      {from:41,to:45, text:"食物詞彙與顏色，認讀菜單常見字"},
+      {from:46,to:50, text:"購物用語，模擬問價錢與砍價"},
+      {from:51,to:55, text:"交通工具詞彙，學方向與地點詞"},
+      {from:56,to:60, text:"問路句型，模擬問路與指路練習"},
+      {from:61,to:65, text:"餐廳點餐句型，練習點餐與要求"},
+      {from:66,to:70, text:"菜單閱讀與常見料理詞彙練習"},
+      {from:71,to:75, text:"常用句型整合：我想要... 我喜歡..."},
+      {from:76,to:80, text:"情境對話練習：市場、藥局、車站"},
+      {from:81,to:85, text:"閱讀短句與標誌，練習發音與理解"},
+      {from:86,to:90, text:"寫作練習：寫 3 個單字與 1 句短句"},
+      {from:91,to:99, text:"模擬完整情境：購物、問路、餐廳"},
+      {from:100,to:100, text:"Day 100 模擬測驗：自我介紹 + 問路 + 點餐"}
+    ];
+    function getTaskForDay(d){
+      for(const r of taskRanges) if(d>=r.from && d<=r.to) return r.text;
+      return "每日複習：字母、詞彙、聽力模仿";
+    }
+
+    // ---------- localStorage keys & state ----------
+    const PLAN_KEY = 'thai100_progress_v1';
+    const WORDS_KEY = 'thai100_words_v1';
+    let planState = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}');
+    if(!Array.isArray(planState.days) || planState.days.length !== 100){
+      planState.days = Array(100).fill(false);
+      planState.lastSaved = null;
+    }
+    let wordsState = JSON.parse(localStorage.getItem(WORDS_KEY) || '{}');
+    // wordsState structure: { words: [ {id, day, thai, meaning, note, createdAt} ] }
+    if(!Array.isArray(wordsState.words)) wordsState = { words: [] };
+
+    // ---------- DOM refs ----------
+    const tbody = document.getElementById('tableBody');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const doneCountEl = document.getElementById('doneCount');
+    const leftCountEl = document.getElementById('leftCount');
+    const lastSavedEl = document.getElementById('lastSaved');
+    const searchInput = document.getElementById('searchInput');
+
+    // word area refs
+    const selectDay = document.getElementById('selectDay');
+    const inputThai = document.getElementById('inputThai');
+    const inputMeaning = document.getElementById('inputMeaning');
+    const inputNote = document.getElementById('inputNote');
+    const addWordBtn = document.getElementById('addWordBtn');
+    const clearFormBtn = document.getElementById('clearForm');
+    const wordList = document.getElementById('wordList');
+    const totalWords = document.getElementById('totalWords');
+    const currentDayLabel = document.getElementById('currentDayLabel');
+    const wordSearch = document.getElementById('wordSearch');
+    const showAllWordsBtn = document.getElementById('showAllWords');
+    const deleteAllWordsBtn = document.getElementById('deleteAllWords');
+
+    // populate day select
+    for(let i=1;i<=100;i++){
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = 'Day ' + i;
+      selectDay.appendChild(opt);
+    }
+
+    // ---------- render plan table ----------
+    function renderTable(filter=''){
+      tbody.innerHTML = '';
+      for(let i=1;i<=100;i++){
+        const tr = document.createElement('tr');
+        const done = !!planState.days[i-1];
+        if(done) tr.classList.add('done');
+
+        const tdDay = document.createElement('td'); tdDay.className='day'; tdDay.textContent='Day ' + i;
+        const tdTask = document.createElement('td'); tdTask.className='task'; tdTask.textContent=getTaskForDay(i);
+        const tdCheck = document.createElement('td'); tdCheck.className='checkbox';
+        const input = document.createElement('input'); input.type='checkbox'; input.checked = done; input.dataset.day = i;
+        input.addEventListener('change', onToggle);
+        tdCheck.appendChild(input);
+
+        // 點 Day 行時自動選擇該 Day（方便新增單字）
+        tr.addEventListener('click', (e)=>{
+          // 若點擊 checkbox 則不切換
+          if(e.target.tagName.toLowerCase() === 'input') return;
+          selectDay.value = i;
+          currentDayLabel.textContent = i;
+          renderWordList(); // 顯示該日單字
+          // 滑動右側到頂
+          document.querySelector('.card.vcard').scrollIntoView({behavior:'smooth',block:'center'});
+        });
+
+        const rowText = (tdDay.textContent + ' ' + tdTask.textContent).toLowerCase();
+        if(filter && !rowText.includes(filter.toLowerCase())) tr.style.display='none';
+
+        tr.appendChild(tdDay); tr.appendChild(tdTask); tr.appendChild(tdCheck);
+        tbody.appendChild(tr);
+      }
+      updateStats();
+    }
+
+    function onToggle(e){
+      const day = Number(e.target.dataset.day);
+      planState.days[day-1] = e.target.checked;
+      savePlanState();
+      const row = e.target.closest('tr');
+      if(e.target.checked) row.classList.add('done'); else row.classList.remove('done');
+      updateStats();
+    }
+
+    function savePlanState(){
+      planState.lastSaved = new Date().toISOString();
+      localStorage.setItem(PLAN_KEY, JSON.stringify(planState));
+      lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString();
+    }
+
+    function updateStats(){
+      const doneCount = planState.days.filter(Boolean).length;
+      doneCountEl.textContent = doneCount;
+      leftCountEl.textContent = 100 - doneCount;
+      progressText.textContent = `${doneCount} / 100 完成`;
+      progressBar.style.width = (doneCount) + '%';
+    }
+
+    // ---------- plan controls ----------
+    document.getElementById('markAll').addEventListener('click', ()=>{
+      if(!confirm('確定要將所有天數標為完成嗎？')) return;
+      planState.days = planState.days.map(()=>true);
+      savePlanState();
+      renderTable(searchInput.value.trim());
+    });
+    document.getElementById('clearAll').addEventListener('click', ()=>{
+      if(!confirm('確定要重設所有打卡紀錄？')) return;
+      planState.days = planState.days.map(()=>false);
+      savePlanState();
+      renderTable(searchInput.value.trim());
+    });
+    searchInput.addEventListener('input', (e)=> renderTable(e.target.value.trim()));
+
+    // ---------- 單字功能 ----------
+    function saveWordsState(){
+      localStorage.setItem(WORDS_KEY, JSON.stringify(wordsState));
+      updateWordStats();
+    }
+    function updateWordStats(){
+      totalWords.textContent = `${wordsState.words.length} 字`;
+    }
+
+    function uid(){
+      return 'w_' + Math.random().toString(36).slice(2,9);
+    }
+
+    addWordBtn.addEventListener('click', ()=>{
+      const thai = inputThai.value.trim();
+      if(!thai){ alert('請輸入泰文單字'); inputThai.focus(); return; }
+      const meaning = inputMeaning.value.trim();
+      const note = inputNote.value.trim();
+      const day = Number(selectDay.value) || 1;
+      const item = { id: uid(), day, thai, meaning, note, createdAt: new Date().toISOString() };
+      wordsState.words.push(item);
+      saveWordsState();
+      clearForm();
+      renderWordList();
+    });
+
+    clearFormBtn.addEventListener('click', clearForm);
+    function clearForm(){ inputThai.value=''; inputMeaning.value=''; inputNote.value=''; inputThai.focus(); }
+
+    // render word list (by selected day or all)
+    let showAll = false;
+    function renderWordList(){
+      const filterText = (wordSearch.value || '').toLowerCase();
+      const selectedDay = Number(selectDay.value);
+      currentDayLabel.textContent = selectedDay;
+      wordList.innerHTML = '';
+      const list = wordsState.words
+        .filter(w => showAll ? true : w.day === selectedDay)
+        .filter(w => {
+          if(!filterText) return true;
+          return (w.thai + ' ' + (w.meaning||'') + ' ' + (w.note||'')).toLowerCase().includes(filterText);
+        })
+        .sort((a,b)=> a.day - b.day || new Date(b.createdAt) - new Date(a.createdAt));
+
+      if(list.length === 0){
+        const empty = document.createElement('div'); empty.className='small'; empty.textContent='目前沒有單字';
+        wordList.appendChild(empty); return;
+      }
+
+      for(const w of list){
+        const item = document.createElement('div'); item.className='word-item';
+        const left = document.createElement('div');
+        const main = document.createElement('div'); main.className='word-main'; main.textContent = w.thai;
+        const sub = document.createElement('div'); sub.className='word-sub';
+        sub.textContent = `Day ${w.day}` + (w.meaning ? ' · ' + w.meaning : '') + (w.note ? ' · ' + w.note : '');
+        left.appendChild(main); left.appendChild(sub);
+
+        const actions = document.createElement('div'); actions.className='word-actions';
+        const editBtn = document.createElement('button'); editBtn.className='btn ghost'; editBtn.textContent='編輯';
+        const delBtn = document.createElement('button'); delBtn.className='btn'; delBtn.style.background='#ef4444'; delBtn.textContent='刪除';
+
+        editBtn.addEventListener('click', ()=>{
+          // 填回表單做編輯（暫以刪除+新增方式處理）
+          if(!confirm('編輯會將該筆載入表單，儲存後會新增為新筆，原筆將保留。要繼續嗎？')) return;
+          selectDay.value = w.day; currentDayLabel.textContent = w.day;
+          inputThai.value = w.thai; inputMeaning.value = w.meaning || ''; inputNote.value = w.note || '';
+          // scroll to form
+          inputThai.scrollIntoView({behavior:'smooth',block:'center'});
+        });
+
+        delBtn.addEventListener('click', ()=>{
+          if(!confirm('確定要刪除此單字？')) return;
+          wordsState.words = wordsState.words.filter(x=>x.id !== w.id);
+          saveWordsState();
+          renderWordList();
+        });
+
+        actions.appendChild(editBtn); actions.appendChild(delBtn);
+        item.appendChild(left); item.appendChild(actions);
+        wordList.appendChild(item);
+      }
+    }
+
+    // show all / delete all
+    showAllWordsBtn.addEventListener('click', ()=>{
+      showAll = !showAll;
+      showAllWordsBtn.textContent = showAll ? '顯示單日' : '顯示全部';
+      renderWordList();
+    });
+    deleteAllWordsBtn.addEventListener('click', ()=>{
+      if(!confirm('確定要刪除單字庫中所有單字？此動作無法還原。')) return;
+      wordsState.words = [];
+      saveWordsState();
+      renderWordList();
+    });
+
+    // search words
+    wordSearch.addEventListener('input', ()=> renderWordList());
+
+    // ---------- 初始化渲染 ----------
+    renderTable();
+    renderWordList();
+    updateWordStats();
+    if(planState.lastSaved) lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString();
+
+    // ---------- 快捷鍵與儲存提示 ----------
+    window.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
+        e.preventDefault();
+        savePlanState();
+        saveWordsState();
+        alert('已儲存進度與單字');
+      }
+    });
+
+    // 自動儲存 planState 變更（debounce）
+    let saveTimer = null;
+    function savePlanStateDebounced(){
+      if(saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=>{ savePlanState(); }, 400);
+    }
+    // 監聽 planState checkbox 變更已在 onToggle 中直接儲存
+
+    // 在頁面載入時，若 localStorage 有 startDate，將 selectDay 設為對應 Day（選擇性）
+    const startISO = localStorage.getItem('thai100_startDate_v1');
+    if(startISO){
+      const start = new Date(startISO);
+      const now = new Date();
+      const diffDays = Math.floor((now - start) / (1000*60*60*24));
+      const dayIndex = Math.min(Math.max(1, diffDays + 1), 100);
+      selectDay.value = dayIndex;
+      currentDayLabel.textContent = dayIndex;
+    }
+
+    // 儲存 wordsState 異動（例如外部修改）時更新顯示
+    window.addEventListener('storage', (e)=>{
+      if(e.key === WORDS_KEY){
+        wordsState = JSON.parse(localStorage.getItem(WORDS_KEY) || '{}');
+        if(!Array.isArray(wordsState.words)) wordsState = { words: [] };
+        renderWordList(); updateWordStats();
+      }
+    });
+  </script>
+</body>
+</html>
