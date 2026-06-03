@@ -3,105 +3,118 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>100 天泰文 A1 </title>
+  <title>100 天泰文 A1 — 手機優化版</title>
 
-
+  <!-- CSP: 允許內嵌 script nonce 與 Chart.js CDN -->
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'nonce-3f9b2c7a' 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+    content="default-src 'self'; script-src 'nonce-3f9b2c7a' 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="3f9b2c7a"></script>
 
   <style>
     :root{
-      --bg:#f7fafc; --card:#ffffff; --accent:#0ea5e9; --muted:#6b7280; --danger:#ef4444;
-      --radius:12px; --gap:12px;
+      --bg1:#fceabb;
+      --bg2:#f8b500;
+      --card:#fff;
+      --accent:#ff8a00;
+      --accent-2:#ffb86b;
+      --muted:#6b7280;
+      --danger:#ff4d4d;
+      --radius:12px;
+      --gap:12px;
+      --shadow: 0 6px 18px rgba(0,0,0,0.08);
+      --touch:48px;
     }
+
+    /* Mobile-first base */
     *{box-sizing:border-box}
-    body{
-      margin:0; font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, Roboto, Arial;
-      background:var(--bg); color:#0f172a; -webkit-font-smoothing:antialiased;
-      padding:12px;
-    }
-    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-    header h1{font-size:18px;margin:0}
-    header p{margin:0;color:var(--muted);font-size:13px}
-    .layout{display:grid;grid-template-columns:1fr;gap:12px}
-    .card{background:var(--card);border-radius:var(--radius);padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06)}
+    html,body{height:100%;min-height:100dvh;margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#222;padding:12px;-webkit-font-smoothing:antialiased}
+    h1{margin:0 0 8px;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,0.25);font-size:18px}
+    .subtitle{color:#fff;opacity:0.95;font-size:13px;margin-top:4px}
+
+    /* Layout: stacked for mobile */
+    .wrap{display:flex;flex-direction:column;gap:12px;max-width:980px;margin:0 auto}
+
+    .card{background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
     .top-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .progress-wrap{flex:1;min-width:120px}
-    .progress{background:#e6f6ff;border-radius:999px;height:10px;overflow:hidden}
-    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#6c5ce7);width:0%;transition:width .25s}
+    .progress{background:rgba(255,255,255,0.6);border-radius:999px;height:10px;overflow:hidden;flex:1}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .25s}
     .small{font-size:13px;color:var(--muted)}
-    .btn{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:10px;font-size:14px;cursor:pointer}
-    .btn.ghost{background:#fff;color:var(--accent);border:1px solid rgba(14,165,233,0.12)}
+    .btn{background:var(--accent);color:#fff;border:none;padding:12px;border-radius:10px;font-size:16px;cursor:pointer;min-height:var(--touch);display:inline-flex;align-items:center;justify-content:center}
+    .btn.ghost{background:#fff;color:var(--accent);border:1px solid rgba(255,138,0,0.12)}
     .btn.warn{background:var(--danger)}
-    .search{flex:1;padding:10px;border-radius:10px;border:1px solid #e6eefc;font-size:14px}
-    .table-wrap{overflow:auto;border-radius:10px;border:1px solid #eef2ff;max-height:44vh}
-    table{width:100%;border-collapse:collapse;font-size:14px}
-    th,td{padding:10px;border-bottom:1px solid #f3f6fb;text-align:left}
-    th{position:sticky;top:0;background:#fff;z-index:2}
-    tr.done td{background:rgba(34,197,94,0.04)}
-    .day{width:72px;font-weight:700}
-    .task{min-width:220px}
-    .checkbox{text-align:center;width:64px}
+    .search{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-size:16px}
+
+    /* Table simplified for mobile: use list-like rows */
+    .plan-list{display:flex;flex-direction:column;gap:8px;max-height:44vh;overflow:auto;padding:4px}
+    .plan-item{background:linear-gradient(180deg,#fff,#fff7eb);border-radius:10px;padding:10px;display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid rgba(0,0,0,0.04)}
+    .plan-left{display:flex;gap:8px;align-items:center}
+    .day-pill{background:rgba(255,255,255,0.9);padding:8px 10px;border-radius:999px;font-weight:700}
+    .task-text{font-size:14px;color:#111}
+    .checkbox{display:flex;align-items:center;gap:8px}
+
+    /* Word bank */
     .vcard{display:flex;flex-direction:column;gap:8px}
     .form-row{display:flex;gap:8px;flex-wrap:wrap}
-    input[type="text"], select, textarea{padding:10px;border-radius:10px;border:1px solid #e6eefc;font-size:14px}
-    textarea{min-height:72px;resize:vertical}
-    .word-list{max-height:36vh;overflow:auto;border-radius:10px;border:1px solid #eef2ff;padding:8px;background:#fff}
-    .word-item{display:flex;align-items:flex-start;gap:8px;padding:8px;border-bottom:1px solid #f3f6fb}
-    .word-main{font-weight:700}
+    input[type="text"], select, textarea, input[type="password"], input[type="number"], input[type="date"]{padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-size:16px}
+    textarea{min-height:96px;resize:vertical}
+    .word-list{max-height:36vh;overflow:auto;border-radius:10px;border:1px solid rgba(0,0,0,0.06);padding:8px;background:linear-gradient(180deg,#fff,#fff7eb)}
+    .word-item{display:flex;align-items:flex-start;gap:8px;padding:10px;border-bottom:1px solid rgba(0,0,0,0.04)}
+    .word-main{font-weight:700;font-size:16px}
     .word-sub{font-size:13px;color:var(--muted)}
-    .word-actions{margin-left:auto;display:flex;gap:6px}
-    .pill{background:#eef2ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-size:13px}
-    .bottom-bar{
-      position:fixed;left:12px;right:12px;bottom:12px;background:linear-gradient(180deg,#fff,#f8fafc);
-      border-radius:14px;padding:8px;display:flex;gap:8px;align-items:center;box-shadow:0 10px 30px rgba(2,6,23,0.12);
-      z-index:60;
-    }
-    .bottom-bar .btn{flex:1;padding:12px;border-radius:10px;font-size:15px}
+    .word-actions{margin-left:auto;display:flex;gap:8px}
+
+    /* Reader controls */
+    .reader-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    .reader-controls select{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);font-size:15px}
+
+    /* Study chart & form */
+    .study-wrap{display:flex;flex-direction:column;gap:12px}
+    .chart-card{background:var(--card);padding:10px;border-radius:10px;box-shadow:var(--shadow)}
+    .form{background:var(--card);padding:12px;border-radius:10px;box-shadow:var(--shadow)}
+    .row{display:flex;gap:8px}
+    .row> *{flex:1}
+
+    /* Bottom fixed quick bar for mobile */
+    .fixed-bar{position:fixed;left:12px;right:12px;bottom:12px;background:linear-gradient(180deg,#fff,#fff7eb);border-radius:14px;padding:8px;display:flex;gap:8px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,0.12);z-index:60}
+    .fixed-bar .btn{flex:1;padding:12px;border-radius:10px;font-size:15px}
+
+    /* Larger touch targets on mobile */
     @media(min-width:980px){
-      .layout{grid-template-columns:1fr 420px}
-      .table-wrap{max-height:60vh}
+      .wrap{display:grid;grid-template-columns:1fr 420px;gap:18px}
+      .plan-list{max-height:60vh}
       .word-list{max-height:46vh}
-      .bottom-bar{display:none}
+      .fixed-bar{display:none}
     }
-    /* accessibility focus */
-    :focus{outline:3px solid rgba(14,165,233,0.18);outline-offset:2px}
+
+    :focus{outline:3px solid rgba(255,138,0,0.18);outline-offset:2px}
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>100 天泰文 A1（安全版）</h1>
-      <p class="small">手機友善、單字匯出（CSV）、可選本機加密。請勿儲存敏感憑證於此頁面。</p>
-    </div>
-  </header>
+  <div class="wrap">
+    <header style="margin-bottom:6px">
+      <h1>🌸 100 天泰文 A1</h1>
+      <div class="subtitle">手機優化版 — 單字匯出、可選本機加密、朗讀功能</div>
+    </header>
 
-  <main class="layout">
-    <!-- 計劃表 -->
+    <!-- 左 column (or top on mobile): 計劃表 -->
     <section class="card" aria-label="計劃表">
-      <div class="top-row" style="margin-bottom:8px">
-        <div class="progress-wrap">
+      <div class="top-row" style="margin-bottom:10px">
+        <div style="flex:1;min-width:120px">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
             <div class="small" id="progressText">0 / 100 完成</div>
           </div>
         </div>
-        <button class="btn" id="markAll">全部完成</button>
-        <button class="btn ghost" id="clearAll">重設</button>
+        <button class="btn" id="markAll" aria-label="全部完成">全部完成</button>
+        <button class="btn ghost" id="clearAll" aria-label="重設">重設</button>
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <input id="searchInput" class="search" placeholder="搜尋 Day 或 任務">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="searchInput" class="search" placeholder="搜尋 Day 或 任務" aria-label="搜尋計劃">
       </div>
 
-      <div class="table-wrap" role="region" aria-label="100 天計劃表">
-        <table id="planTable">
-          <thead>
-            <tr><th class="day">Day</th><th class="task">任務</th><th class="checkbox">完成</th></tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+      <div class="plan-list" id="planList" role="list" aria-label="100 天計劃清單"></div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
         <div class="small" id="lastSaved">尚未儲存</div>
@@ -110,28 +123,42 @@
           <div class="small">剩餘 <strong id="leftCount">100</strong></div>
         </div>
       </div>
+
+      <!-- 朗讀控制（簡潔） -->
+      <div style="margin-top:12px">
+        <div style="font-weight:700;margin-bottom:6px">朗讀控制</div>
+        <div class="reader-controls">
+          <button class="btn" id="playAll">播放全部</button>
+          <button class="btn ghost" id="pause">暫停</button>
+          <button class="btn ghost" id="stop">停止</button>
+          <select id="voiceSelect" aria-label="選擇語音"></select>
+        </div>
+        <div id="readerList" class="small" style="margin-top:8px;color:var(--muted)">選擇 Day 後，按播放朗讀該日單字。</div>
+      </div>
     </section>
 
-    <!-- 單字庫 -->
+    <!-- 右 column (or below on mobile): 單字庫 -->
     <aside class="card vcard" aria-label="單字庫">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <strong>單字庫</strong>
           <div class="small">新增 / 編輯 / 匯出（CSV） / 本機加密（選用）</div>
         </div>
-        <div class="pill" id="totalWords">0 字</div>
+        <div class="small" id="totalWords">0 字</div>
       </div>
 
-      <div style="margin-top:8px">
+      <div style="margin-top:10px">
         <div class="form-row" style="margin-bottom:8px">
           <select id="selectDay" aria-label="選擇 Day"></select>
-          <input id="inputThai" type="text" placeholder="泰文單字（必填）" inputmode="text" />
+          <input id="inputThai" type="text" placeholder="泰文單字（必填）" inputmode="text" aria-label="泰文單字" />
         </div>
+
         <div class="form-row" style="margin-bottom:8px">
-          <input id="inputMeaning" type="text" placeholder="中文或英文詞義（選填）" />
+          <input id="inputMeaning" type="text" placeholder="中文或英文詞義（選填）" aria-label="詞義" />
         </div>
+
         <div style="margin-bottom:8px">
-          <textarea id="inputNote" placeholder="備註（發音、例句）"></textarea>
+          <textarea id="inputNote" placeholder="備註（發音、例句）" aria-label="備註"></textarea>
         </div>
 
         <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -140,7 +167,7 @@
         </div>
 
         <div style="display:flex;gap:8px;margin-bottom:8px">
-          <input id="wordSearch" class="search" placeholder="搜尋單字或備註" />
+          <input id="wordSearch" class="search" placeholder="搜尋單字或備註" aria-label="搜尋單字" />
         </div>
 
         <div class="word-list" id="wordList" aria-live="polite"></div>
@@ -157,30 +184,166 @@
           <div style="display:flex;gap:8px;align-items:center">
             <label class="small" for="enableEncrypt">本機加密</label>
             <input id="enableEncrypt" type="checkbox" aria-label="啟用本機加密">
-            <input id="encryptPass" type="password" placeholder="輸入加密密碼（短期）" style="padding:8px;border-radius:8px;border:1px solid #e6eefc">
+            <input id="encryptPass" type="password" placeholder="輸入加密密碼（短期）" style="padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);font-size:14px">
           </div>
         </div>
       </div>
     </aside>
-  </main>
 
-  <div class="bottom-bar" role="toolbar" aria-label="快速操作">
+    <!-- Study chart & record (mobile stacked) -->
+    <div class="study-wrap">
+      <form id="studyForm" class="form" autocomplete="off">
+        <div style="font-weight:700;margin-bottom:8px">學習紀錄</div>
+        <label>日期
+          <input type="date" id="date" required />
+        </label>
+
+        <label style="margin-top:8px">時段
+          <select id="session">
+            <option value="早上">早上</option>
+            <option value="晚上">晚上</option>
+          </select>
+        </label>
+
+        <div class="row" style="margin-top:8px">
+          <label style="flex:1">專注度 (1-5)
+            <input type="number" id="focus" min="1" max="5" value="3" />
+          </label>
+          <label style="flex:1">記憶效果 (1-5)
+            <input type="number" id="memory" min="1" max="5" value="3" />
+          </label>
+        </div>
+
+        <label style="margin-top:8px">語感流暢度 (1-5)
+          <input type="number" id="fluency" min="1" max="5" value="3" />
+        </label>
+
+        <div class="row" style="margin-top:8px">
+          <label style="flex:1">今日重溫字數
+            <input type="number" id="rewords" min="0" value="0" />
+          </label>
+          <label style="flex:1">今日新生字數
+            <input type="number" id="words" min="0" value="0" />
+          </label>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn" type="submit">✅ 紀錄</button>
+          <button id="clearBtn" class="btn warn" type="button" style="background:linear-gradient(90deg,#ff7b7b,#ff3b3b)">🗑️ 刪除全部</button>
+        </div>
+
+        <div style="margin-top:8px;font-size:13px;color:#444">
+          提示：只有當「今日新生字數」大於 0 時，才會加入累積生字數。
+        </div>
+      </form>
+
+      <div class="chart-card">
+        <canvas id="studyChart" height="220"></canvas>
+      </div>
+
+      <div class="card" style="padding:8px">
+        <div style="font-weight:700;margin-bottom:8px">最近紀錄</div>
+        <div id="recordList" style="max-height:220px;overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 固定快速操作列（手機） -->
+  <div class="fixed-bar" role="toolbar" aria-label="快速操作">
     <button class="btn" id="quickAdd">新增單字</button>
     <button class="btn ghost" id="quickExport">匯出當日 CSV</button>
   </div>
 
-  <!--
-    注意：
-    - 此檔案使用 CSP nonce '3f9b2c7a'（與 meta 中一致）允許此內嵌 script 執行。
-    - 若部署到伺服器，請改由伺服器動態產生 nonce 並在 HTTP header 設定 CSP。
-    - 不要在此頁面儲存任何敏感憑證（密碼、JWT、API key）。本機加密僅保護資料在裝置上的可讀性，若裝置被攻破仍有風險。
-  -->
   <script nonce="3f9b2c7a">
-    'use strict';
+  'use strict';
+  (function () {
+    /* -------------------------
+       Data & keys
+    ------------------------- */
+    const PLAN_KEY = 'thai100_progress_v1';
+    const WORDS_KEY = 'thai100_words_v1_encrypted';
+    const WORDS_KEY_PLAIN = 'thai100_words_v1_plain';
+    const KEY_RECORDS = 'thaiStudyRecords_v3';
+    const KEY_TOTAL = 'thaiTotalWords_v3';
+
+    let planState = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}');
+    if(!Array.isArray(planState.days) || planState.days.length !== 100){
+      planState.days = Array(100).fill(false);
+      planState.lastSaved = null;
+    }
+
+    let wordsState = { words: [] };
+    (function loadWordsOnStart(){
+      const encrypted = localStorage.getItem(WORDS_KEY);
+      const plain = localStorage.getItem(WORDS_KEY_PLAIN);
+      if(plain){
+        try { wordsState = JSON.parse(plain); if(!Array.isArray(wordsState.words)) wordsState = { words: [] }; }
+        catch(e){ wordsState = { words: [] }; }
+      } else if(encrypted){
+        wordsState = { words: [] };
+      } else {
+        wordsState = { words: [] };
+      }
+    })();
+
+    let records = JSON.parse(localStorage.getItem(KEY_RECORDS) || '[]');
+    let totalWords = parseInt(localStorage.getItem(KEY_TOTAL) || '0');
 
     /* -------------------------
-       設定與任務產生
-       ------------------------- */
+       DOM refs
+    ------------------------- */
+    const planList = document.getElementById('planList');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const doneCountEl = document.getElementById('doneCount');
+    const leftCountEl = document.getElementById('leftCount');
+    const lastSavedEl = document.getElementById('lastSaved');
+    const searchInput = document.getElementById('searchInput');
+    const selectDay = document.getElementById('selectDay');
+    const inputThai = document.getElementById('inputThai');
+    const inputMeaning = document.getElementById('inputMeaning');
+    const inputNote = document.getElementById('inputNote');
+    const addWordBtn = document.getElementById('addWordBtn');
+    const clearFormBtn = document.getElementById('clearForm');
+    const wordList = document.getElementById('wordList');
+    const totalWordsEl = document.getElementById('totalWords');
+    const currentDayLabel = document.getElementById('currentDayLabel');
+    const wordSearch = document.getElementById('wordSearch');
+    const showAllWordsBtn = document.getElementById('showAllWords');
+    const deleteAllWordsBtn = document.getElementById('deleteAllWords');
+    const exportDayCsvBtn = document.getElementById('exportDayCsv');
+    const exportAllCsvBtn = document.getElementById('exportAllCsv');
+    const quickAdd = document.getElementById('quickAdd');
+    const quickExport = document.getElementById('quickExport');
+    const enableEncrypt = document.getElementById('enableEncrypt');
+    const encryptPass = document.getElementById('encryptPass');
+
+    const playAllBtn = document.getElementById('playAll');
+    const pauseBtn = document.getElementById('pause');
+    const stopBtn = document.getElementById('stop');
+    const voiceSelect = document.getElementById('voiceSelect');
+
+    const dateInput = document.getElementById('date');
+    const sessionInput = document.getElementById('session');
+    const focusInput = document.getElementById('focus');
+    const memoryInput = document.getElementById('memory');
+    const fluencyInput = document.getElementById('fluency');
+    const newWordsInput = document.getElementById('words');
+    const reWordsInput = document.getElementById('rewords');
+    const studyForm = document.getElementById('studyForm');
+    const recordList = document.getElementById('recordList');
+    const clearBtn = document.getElementById('clearBtn');
+
+    /* -------------------------
+       Utility
+    ------------------------- */
+    function uid(){ return 'w_' + Math.random().toString(36).slice(2,9); }
+    function savePlanState(){ planState.lastSaved = new Date().toISOString(); localStorage.setItem(PLAN_KEY, JSON.stringify(planState)); lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString(); }
+    function totalWordsElUpdate(){ totalWordsEl.textContent = `${wordsState.words.length} 字`; }
+
+    /* -------------------------
+       Tasks for 100 days
+    ------------------------- */
     const taskRanges = [
       {from:1,to:5, text:"學 5 個子音，練筆順 + 聽音檔"},
       {from:6,to:10, text:"學 5 個子音，練習組合音"},
@@ -209,141 +372,43 @@
     }
 
     /* -------------------------
-       localStorage keys & state
-       ------------------------- */
-    const PLAN_KEY = 'thai100_progress_v1';
-    const WORDS_KEY = 'thai100_words_v1_encrypted'; // 若啟用加密，會存放加密 blob；否則存放明文 JSON under WORDS_KEY_plain
-    const WORDS_KEY_PLAIN = 'thai100_words_v1_plain';
-
-    let planState = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}');
-    if(!Array.isArray(planState.days) || planState.days.length !== 100){
-      planState.days = Array(100).fill(false);
-      planState.lastSaved = null;
-    }
-
-    // wordsState: in-memory plain JS object { words: [...] }
-    let wordsState = { words: [] };
-
-    // load plain or encrypted on init
-    (function loadWordsOnStart(){
-      // if encrypted blob exists, we keep it but do not decrypt until user provides passphrase
-      const encrypted = localStorage.getItem(WORDS_KEY);
-      const plain = localStorage.getItem(WORDS_KEY_PLAIN);
-      if(plain){
-        try { wordsState = JSON.parse(plain); if(!Array.isArray(wordsState.words)) wordsState = { words: [] }; }
-        catch(e){ wordsState = { words: [] }; }
-      } else if(encrypted){
-        // keep wordsState empty until user decrypts
-        wordsState = { words: [] };
-      } else {
-        wordsState = { words: [] };
-      }
-    })();
-
-    /* -------------------------
-       DOM refs
-       ------------------------- */
-    const tbody = document.getElementById('tableBody');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const doneCountEl = document.getElementById('doneCount');
-    const leftCountEl = document.getElementById('leftCount');
-    const lastSavedEl = document.getElementById('lastSaved');
-    const searchInput = document.getElementById('searchInput');
-
-    const selectDay = document.getElementById('selectDay');
-    const inputThai = document.getElementById('inputThai');
-    const inputMeaning = document.getElementById('inputMeaning');
-    const inputNote = document.getElementById('inputNote');
-    const addWordBtn = document.getElementById('addWordBtn');
-    const clearFormBtn = document.getElementById('clearForm');
-    const wordList = document.getElementById('wordList');
-    const totalWords = document.getElementById('totalWords');
-    const currentDayLabel = document.getElementById('currentDayLabel');
-    const wordSearch = document.getElementById('wordSearch');
-    const showAllWordsBtn = document.getElementById('showAllWords');
-    const deleteAllWordsBtn = document.getElementById('deleteAllWords');
-    const exportDayCsvBtn = document.getElementById('exportDayCsv');
-    const exportAllCsvBtn = document.getElementById('exportAllCsv');
-    const quickAdd = document.getElementById('quickAdd');
-    const quickExport = document.getElementById('quickExport');
-    const enableEncrypt = document.getElementById('enableEncrypt');
-    const encryptPass = document.getElementById('encryptPass');
-
-    // populate day select
-    for(let i=1;i<=100;i++){
-      const opt = document.createElement('option'); opt.value = i; opt.textContent = 'Day ' + i;
-      selectDay.appendChild(opt);
-    }
-
-    /* -------------------------
-       安全工具函式（輸入消毒、避免 innerHTML）
-       - 所有使用者輸入在顯示時使用 textContent 或經過 escapeHTML
-       ------------------------- */
-    function escapeHTML(s){
-      if(s === null || s === undefined) return '';
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    // 產生唯一 id
-    function uid(){ return 'w_' + Math.random().toString(36).slice(2,9); }
-
-    /* -------------------------
-       Plan table 渲染與操作
-       ------------------------- */
-    function renderTable(filter=''){
-      tbody.innerHTML = '';
+       Render plan list (mobile-friendly)
+    ------------------------- */
+    function renderPlan(filter=''){
+      planList.innerHTML = '';
       for(let i=1;i<=100;i++){
-        const tr = document.createElement('tr');
         const done = !!planState.days[i-1];
-        if(done) tr.classList.add('done');
+        const item = document.createElement('div');
+        item.className = 'plan-item';
+        const left = document.createElement('div'); left.className = 'plan-left';
+        const day = document.createElement('div'); day.className = 'day-pill'; day.textContent = 'Day ' + i;
+        const task = document.createElement('div'); task.className = 'task-text'; task.textContent = getTaskForDay(i);
+        left.appendChild(day); left.appendChild(task);
+        const right = document.createElement('div'); right.className = 'checkbox';
+        const chk = document.createElement('input'); chk.type = 'checkbox'; chk.checked = done; chk.dataset.day = i; chk.style.width='22px'; chk.style.height='22px';
+        chk.addEventListener('change', onToggle);
+        right.appendChild(chk);
+        item.appendChild(left); item.appendChild(right);
 
-        const tdDay = document.createElement('td'); tdDay.className='day'; tdDay.textContent='Day ' + i;
-        const tdTask = document.createElement('td'); tdTask.className='task'; tdTask.textContent=getTaskForDay(i);
-        const tdCheck = document.createElement('td'); tdCheck.className='checkbox';
-        const input = document.createElement('input'); input.type='checkbox'; input.checked = done; input.dataset.day = i;
-        input.addEventListener('change', onToggle);
-        tdCheck.appendChild(input);
-
-        tr.addEventListener('click', (e)=>{
+        item.addEventListener('click', (e)=>{
           if(e.target.tagName.toLowerCase() === 'input') return;
           selectDay.value = i; currentDayLabel.textContent = i; renderWordList();
+          // scroll to word bank on mobile
           document.querySelector('.vcard').scrollIntoView({behavior:'smooth',block:'center'});
         });
 
-        const rowText = (tdDay.textContent + ' ' + tdTask.textContent).toLowerCase();
-        if(filter && !rowText.includes(filter.toLowerCase())) tr.style.display='none';
-
-        tr.appendChild(tdDay); tr.appendChild(tdTask); tr.appendChild(tdCheck);
-        tbody.appendChild(tr);
+        const rowText = (day.textContent + ' ' + task.textContent).toLowerCase();
+        if(filter && !rowText.includes(filter.toLowerCase())) item.style.display='none';
+        planList.appendChild(item);
       }
       updateStats();
     }
-
     function onToggle(e){
       const day = Number(e.target.dataset.day);
       planState.days[day-1] = e.target.checked;
       savePlanState();
-      const row = e.target.closest('tr');
-      if(e.target.checked) row.classList.add('done'); else row.classList.remove('done');
       updateStats();
     }
-
-    function savePlanState(){
-      planState.lastSaved = new Date().toISOString();
-      try {
-        localStorage.setItem(PLAN_KEY, JSON.stringify(planState));
-        lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString();
-      } catch(e){
-        console.error('儲存計劃失敗', e);
-      }
-    }
-
     function updateStats(){
       const doneCount = planState.days.filter(Boolean).length;
       doneCountEl.textContent = doneCount;
@@ -352,33 +417,51 @@
       progressBar.style.width = (doneCount) + '%';
     }
 
-    document.getElementById('markAll').addEventListener('click', ()=>{
-      if(!confirm('確定要將所有天數標為完成嗎？')) return;
-      planState.days = planState.days.map(()=>true);
-      savePlanState(); renderTable(searchInput.value.trim());
-    });
-    document.getElementById('clearAll').addEventListener('click', ()=>{
-      if(!confirm('確定要重設所有打卡紀錄？')) return;
-      planState.days = planState.days.map(()=>false);
-      savePlanState(); renderTable(searchInput.value.trim());
-    });
-    searchInput.addEventListener('input', (e)=> renderTable(e.target.value.trim()));
-
     /* -------------------------
-       單字功能（明文操作，儲存時視加密設定決定是否加密）
-       - 所有顯示使用 textContent（或 escapeHTML）避免 XSS
-       ------------------------- */
-    function saveWordsPlain(){
-      try {
-        localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
-        updateWordStats();
-      } catch(e){ console.error('儲存單字失敗', e); }
+       Word bank functions
+    ------------------------- */
+    function renderWordList(){
+      const filterText = (wordSearch.value || '').toLowerCase();
+      const selectedDay = Number(selectDay.value) || 1;
+      currentDayLabel.textContent = selectedDay;
+      wordList.innerHTML = '';
+      const list = wordsState.words
+        .filter(w => w.day === selectedDay)
+        .filter(w => {
+          if(!filterText) return true;
+          return (w.thai + ' ' + (w.meaning||'') + ' ' + (w.note||'')).toLowerCase().includes(filterText);
+        })
+        .sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+      if(list.length === 0){
+        const empty = document.createElement('div'); empty.className='small'; empty.textContent='目前沒有單字';
+        wordList.appendChild(empty); return;
+      }
+      for(const w of list){
+        const item = document.createElement('div'); item.className='word-item';
+        const left = document.createElement('div');
+        const main = document.createElement('div'); main.className='word-main'; main.textContent = w.thai;
+        const sub = document.createElement('div'); sub.className='word-sub'; sub.textContent = `Day ${w.day}` + (w.meaning ? ' · ' + w.meaning : '') + (w.note ? ' · ' + w.note : '');
+        left.appendChild(main); left.appendChild(sub);
+        const actions = document.createElement('div'); actions.className='word-actions';
+        const editBtn = document.createElement('button'); editBtn.className='btn ghost'; editBtn.textContent='編輯'; editBtn.style.padding='8px';
+        const delBtn = document.createElement('button'); delBtn.className='btn'; delBtn.textContent='刪除'; delBtn.style.background='var(--danger)'; delBtn.style.padding='8px';
+        editBtn.addEventListener('click', ()=>{
+          if(!confirm('編輯會將該筆載入表單，儲存後會新增為新筆，原筆將保留。要繼續嗎？')) return;
+          selectDay.value = w.day; currentDayLabel.textContent = w.day;
+          inputThai.value = w.thai; inputMeaning.value = w.meaning || ''; inputNote.value = w.note || '';
+          inputThai.scrollIntoView({behavior:'smooth',block:'center'});
+        });
+        delBtn.addEventListener('click', ()=>{
+          if(!confirm('確定要刪除此單字？')) return;
+          wordsState.words = wordsState.words.filter(x=>x.id !== w.id);
+          saveWordsAccordingToSetting(); renderWordList();
+        });
+        actions.appendChild(editBtn); actions.appendChild(delBtn);
+        item.appendChild(left); item.appendChild(actions);
+        wordList.appendChild(item);
+      }
     }
 
-    function updateWordStats(){ totalWords.textContent = `${wordsState.words.length} 字`; }
-
-    addWordBtn.addEventListener('click', addWord);
-    quickAdd.addEventListener('click', addWord);
     function addWord(){
       const thai = inputThai.value.trim();
       if(!thai){ alert('請輸入泰文單字'); inputThai.focus(); return; }
@@ -387,79 +470,37 @@
       const day = Number(selectDay.value) || 1;
       const item = { id: uid(), day, thai, meaning, note, createdAt: new Date().toISOString() };
       wordsState.words.push(item);
-      // 儲存：若啟用加密，先儲存明文到 memory，再嘗試加密儲存
       saveWordsAccordingToSetting();
       clearForm(); renderWordList();
     }
-
-    clearFormBtn.addEventListener('click', clearForm);
     function clearForm(){ inputThai.value=''; inputMeaning.value=''; inputNote.value=''; inputThai.focus(); }
 
-    let showAll = false;
-    function renderWordList(){
-      const filterText = (wordSearch.value || '').toLowerCase();
-      const selectedDay = Number(selectDay.value);
-      currentDayLabel.textContent = selectedDay;
-      wordList.innerHTML = '';
-      const list = wordsState.words
-        .filter(w => showAll ? true : w.day === selectedDay)
-        .filter(w => {
-          if(!filterText) return true;
-          return (w.thai + ' ' + (w.meaning||'') + ' ' + (w.note||'')).toLowerCase().includes(filterText);
-        })
-        .sort((a,b)=> a.day - b.day || new Date(b.createdAt) - new Date(a.createdAt));
-
-      if(list.length === 0){
-        const empty = document.createElement('div'); empty.className='small'; empty.textContent='目前沒有單字';
-        wordList.appendChild(empty); return;
-      }
-
-      for(const w of list){
-        const item = document.createElement('div'); item.className='word-item';
-        const left = document.createElement('div');
-        const main = document.createElement('div'); main.className='word-main'; main.textContent = w.thai;
-        const sub = document.createElement('div'); sub.className='word-sub';
-        sub.textContent = `Day ${w.day}` + (w.meaning ? ' · ' + w.meaning : '') + (w.note ? ' · ' + w.note : '');
-        left.appendChild(main); left.appendChild(sub);
-
-        const actions = document.createElement('div'); actions.className='word-actions';
-        const editBtn = document.createElement('button'); editBtn.className='btn ghost'; editBtn.textContent='編輯';
-        const delBtn = document.createElement('button'); delBtn.className='btn'; delBtn.style.background='#ef4444'; delBtn.textContent='刪除';
-
-        editBtn.addEventListener('click', ()=>{
-          if(!confirm('編輯會將該筆載入表單，儲存後會新增為新筆，原筆將保留。要繼續嗎？')) return;
-          selectDay.value = w.day; currentDayLabel.textContent = w.day;
-          inputThai.value = w.thai; inputMeaning.value = w.meaning || ''; inputNote.value = w.note || '';
-          inputThai.scrollIntoView({behavior:'smooth',block:'center'});
+    function saveWordsAccordingToSetting(){
+      if(enableEncrypt.checked){
+        const pass = encryptPass.value;
+        if(!pass){
+          if(!confirm('您已啟用加密但未輸入密碼。是否以明文儲存（不安全）？按「取消」可先輸入密碼再儲存。')) {
+            return;
+          }
+          localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
+          localStorage.removeItem(WORDS_KEY);
+          totalWordsElUpdate();
+          return;
+        }
+        encryptAndStoreWords(pass).then(()=> {
+          localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
+          totalWordsElUpdate();
         });
-
-        delBtn.addEventListener('click', ()=>{
-          if(!confirm('確定要刪除此單字？')) return;
-          wordsState.words = wordsState.words.filter(x=>x.id !== w.id);
-          saveWordsAccordingToSetting(); renderWordList();
-        });
-
-        actions.appendChild(editBtn); actions.appendChild(delBtn);
-        item.appendChild(left); item.appendChild(actions);
-        wordList.appendChild(item);
+      } else {
+        localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
+        localStorage.removeItem(WORDS_KEY);
+        totalWordsElUpdate();
       }
     }
 
-    showAllWordsBtn.addEventListener('click', ()=>{
-      showAll = !showAll;
-      showAllWordsBtn.textContent = showAll ? '顯示單日' : '顯示全部';
-      renderWordList();
-    });
-    deleteAllWordsBtn.addEventListener('click', ()=>{
-      if(!confirm('確定要刪除單字庫中所有單字？此動作無法還原。')) return;
-      wordsState.words = []; saveWordsAccordingToSetting(); renderWordList();
-    });
-    wordSearch.addEventListener('input', ()=> renderWordList());
-    selectDay.addEventListener('change', ()=> renderWordList());
-
     /* -------------------------
-       CSV 匯出（UTF-8 BOM，Excel 可正確開啟）
-       ------------------------- */
+       CSV export
+    ------------------------- */
     function toCsv(rows){
       const esc = v => {
         if(v === null || v === undefined) return '';
@@ -477,11 +518,6 @@
       document.body.appendChild(a); a.click();
       a.remove(); URL.revokeObjectURL(url);
     }
-
-    exportDayCsvBtn.addEventListener('click', ()=> exportCsvForDay(Number(selectDay.value)));
-    exportAllCsvBtn.addEventListener('click', exportCsvAll);
-    quickExport.addEventListener('click', ()=> exportCsvForDay(Number(selectDay.value)));
-
     function exportCsvForDay(day){
       const list = wordsState.words.filter(w => w.day === day);
       if(list.length === 0){ alert('該日沒有單字可匯出'); return; }
@@ -490,7 +526,6 @@
       const csv = toCsv(rows);
       download(`thai_words_day${day}.csv`, csv);
     }
-
     function exportCsvAll(){
       if(wordsState.words.length === 0){ alert('單字庫為空'); return; }
       const rows = [['Day','泰文','詞義','備註','新增時間']];
@@ -501,26 +536,13 @@
     }
 
     /* -------------------------
-       本機加密（選用）
-       - 使用 Web Crypto API（AES-GCM）對單字庫 JSON 做加密
-       - 密碼不會儲存在 localStorage；使用者需在每次解密時輸入密碼
-       - 加密流程：deriveKey(PBKDF2) -> AES-GCM encrypt
-       - 儲存格式（localStorage under WORDS_KEY）: base64(iv) + ':' + base64(ciphertext) + ':' + base64(salt)
-       ------------------------- */
+       Encryption (Web Crypto API)
+    ------------------------- */
     async function deriveKeyFromPassword(password, saltBuffer){
       const enc = new TextEncoder();
-      const keyMaterial = await window.crypto.subtle.importKey(
-        'raw', enc.encode(password), {name:'PBKDF2'}, false, ['deriveKey']
-      );
-      return window.crypto.subtle.deriveKey(
-        { name: 'PBKDF2', salt: saltBuffer, iterations: 200000, hash: 'SHA-256' },
-        keyMaterial,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt','decrypt']
-      );
+      const keyMaterial = await window.crypto.subtle.importKey('raw', enc.encode(password), {name:'PBKDF2'}, false, ['deriveKey']);
+      return window.crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBuffer, iterations: 200000, hash: 'SHA-256' }, keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt','decrypt']);
     }
-
     function bufToBase64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
     function base64ToBuf(b64){ const bin = atob(b64); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr.buffer; }
 
@@ -534,7 +556,6 @@
         const cipher = await window.crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, enc.encode(plain));
         const payload = bufToBase64(iv) + ':' + bufToBase64(cipher) + ':' + bufToBase64(salt);
         localStorage.setItem(WORDS_KEY, payload);
-        // remove plain storage if exists
         localStorage.removeItem(WORDS_KEY_PLAIN);
         alert('單字已加密並儲存於本機');
       } catch(e){
@@ -559,9 +580,8 @@
         const obj = JSON.parse(json);
         if(!Array.isArray(obj.words)) throw new Error('資料格式錯誤');
         wordsState = obj;
-        // store plain for current session only (not persisted if encryption enabled)
         localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
-        renderWordList(); updateWordStats();
+        renderWordList(); totalWordsElUpdate();
         alert('解密成功，單字已載入（本次會話）');
         return true;
       } catch(e){
@@ -571,52 +591,17 @@
       }
     }
 
-    // 根據加密設定儲存：若啟用且有密碼，則加密儲存；否則儲存明文
-    function saveWordsAccordingToSetting(){
-      if(enableEncrypt.checked){
-        const pass = encryptPass.value;
-        if(!pass){
-          // 若使用者勾選加密但未輸入密碼，提示並儲存為明文（避免資料遺失）
-          if(!confirm('您已啟用加密但未輸入密碼。是否以明文儲存（不安全）？按「取消」可先輸入密碼再儲存。')) {
-            return;
-          }
-          // fallback: save plain
-          localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
-          localStorage.removeItem(WORDS_KEY);
-          updateWordStats();
-          return;
-        }
-        // perform encryption (async)
-        encryptAndStoreWords(pass).then(()=> {
-          // after encryption, keep plain in session storage for UI convenience
-          localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
-          updateWordStats();
-        });
-      } else {
-        // plain save
-        localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
-        // remove encrypted blob if exists (user opted out)
-        localStorage.removeItem(WORDS_KEY);
-        updateWordStats();
-      }
-    }
-
-    // If user toggles encryption off, we keep plain copy but remove encrypted blob
     enableEncrypt.addEventListener('change', ()=>{
       if(enableEncrypt.checked){
-        // user enabled encryption: require password to encrypt existing words
         const pass = encryptPass.value;
         if(!pass){
           alert('請在「輸入加密密碼」欄位輸入密碼，然後按新增或儲存以完成加密。');
           return;
         }
-        // encrypt current words
         encryptAndStoreWords(pass);
       } else {
-        // disable: remove encrypted blob (but keep plain)
         if(confirm('關閉加密會移除本機的加密資料（若存在）。是否繼續？')){
           localStorage.removeItem(WORDS_KEY);
-          // ensure plain copy exists
           localStorage.setItem(WORDS_KEY_PLAIN, JSON.stringify(wordsState));
           alert('已關閉加密，資料以明文儲存（本機）。');
         } else {
@@ -625,7 +610,6 @@
       }
     });
 
-    // 解密按鈕行為：若頁面載入時發現加密 blob 且使用者輸入密碼，可按此解密
     encryptPass.addEventListener('change', async ()=>{
       const encrypted = localStorage.getItem(WORDS_KEY);
       if(encrypted && encryptPass.value){
@@ -634,44 +618,166 @@
     });
 
     /* -------------------------
-       初始化渲染與事件
-       ------------------------- */
-    function init(){
-      renderTable();
-      renderWordList();
-      updateWordStats();
-      if(planState.lastSaved) lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString();
+       Speech synthesis (朗讀)
+    ------------------------- */
+    let synth = window.speechSynthesis;
+    function populateVoices(){
+      const voices = synth.getVoices();
+      voiceSelect.innerHTML = '';
+      voices.forEach(v=>{
+        const opt = document.createElement('option'); opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+        voiceSelect.appendChild(opt);
+      });
     }
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = populateVoices;
 
-    // quick actions
-    document.getElementById('markAll').addEventListener('click', ()=>{}); // already bound above
-    quickAdd.addEventListener('click', ()=> {
-      // focus input on mobile
-      inputThai.focus();
+    function speakTextList(list){
+      if(!list || list.length===0) { alert('沒有要朗讀的單字'); return; }
+      synth.cancel();
+      const voiceName = voiceSelect.value;
+      const voices = synth.getVoices();
+      const voice = voices.find(v=>v.name===voiceName) || null;
+      for(const w of list){
+        const u = new SpeechSynthesisUtterance(w.thai);
+        if(voice) u.voice = voice;
+        u.rate = 0.9;
+        synth.speak(u);
+      }
+    }
+    playAllBtn.addEventListener('click', ()=>{
+      const selectedDay = Number(selectDay.value) || 1;
+      const list = wordsState.words.filter(w=>w.day===selectedDay);
+      speakTextList(list);
     });
-    quickExport.addEventListener('click', ()=> exportCsvForDay(Number(selectDay.value)));
+    pauseBtn.addEventListener('click', ()=> { if(synth.speaking) synth.pause(); });
+    stopBtn.addEventListener('click', ()=> { if(synth.speaking) synth.cancel(); });
 
-    // storage event: if other tab modified words, update
+    /* -------------------------
+       Study chart (Chart.js) & records
+    ------------------------- */
+    (function setToday(){
+      const t = new Date();
+      const yyyy = t.getFullYear();
+      const mm = String(t.getMonth()+1).padStart(2,'0');
+      const dd = String(t.getDate()).padStart(2,'0');
+      const dateInput = document.getElementById('date');
+      if(dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+    })();
+
+    const ctx = document.getElementById('studyChart').getContext('2d');
+    const studyChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          { label: '早上平均分', data: [], borderColor: '#0077ff', backgroundColor: 'rgba(0,119,255,0.08)', tension:0.25, yAxisID:'y1' },
+          { label: '晚上平均分', data: [], borderColor: '#ff8a00', backgroundColor: 'rgba(255,138,0,0.08)', tension:0.25, yAxisID:'y1' },
+          { label: '累積生字數', data: [], borderColor: '#28c76f', backgroundColor: 'rgba(40,199,111,0.06)', tension:0.25, yAxisID:'y2' }
+        ]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:'index', intersect:false},
+        scales: {
+          y1: { type:'linear', position:'left', suggestedMin:0, suggestedMax:5, title:{display:true, text:'平均分 (1-5)'} },
+          y2: { type:'linear', position:'right', grid:{drawOnChartArea:false}, title:{display:true, text:'累積生字數'} }
+        },
+        plugins: { legend:{position:'top'} }
+      }
+    });
+
+    function renderRecords(){
+      studyChart.data.labels = [];
+      studyChart.data.datasets.forEach(ds => ds.data = []);
+      recordList.innerHTML = '';
+      records.forEach(r => {
+        r.focus = Number(r.focus) || 0;
+        r.memory = Number(r.memory) || 0;
+        r.fluency = Number(r.fluency) || 0;
+        r.newWords = Number(r.newWords) || 0;
+        r.reWords = Number(r.reWords) || 0;
+        r.totalWords = Number(r.totalWords) || 0;
+        if (!studyChart.data.labels.includes(r.date)) studyChart.data.labels.push(r.date);
+        const avg = (r.focus + r.memory + r.fluency) / 3;
+        const morningDs = studyChart.data.datasets.find(d => d.label === '早上平均分');
+        const nightDs = studyChart.data.datasets.find(d => d.label === '晚上平均分');
+        const wordDs = studyChart.data.datasets.find(d => d.label === '累積生字數');
+        if (r.session === '早上') morningDs.data.push(avg);
+        else nightDs.data.push(avg);
+        wordDs.data.push(r.totalWords);
+
+        // add to record list (newest first)
+        const div = document.createElement('div'); div.style.padding='8px'; div.style.borderBottom='1px solid rgba(0,0,0,0.04)';
+        div.innerHTML = `<div style="font-weight:700">${r.date} ${r.session}</div><div style="font-size:13px;color:var(--muted)">專注 ${r.focus} · 記憶 ${r.memory} · 語感 ${r.fluency} · 新生字 ${r.newWords} · 累積 ${r.totalWords}</div>`;
+        recordList.prepend(div);
+      });
+      studyChart.update();
+    }
+    renderRecords();
+
+    studyForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const session = sessionInput.value;
+      const focus = Number(focusInput.value) || 0;
+      const memory = Number(memoryInput.value) || 0;
+      const fluency = Number(fluencyInput.value) || 0;
+      const newWords = Number(newWordsInput.value) || 0;
+      const reWords = Number(reWordsInput.value) || 0;
+      if (newWords > 0) totalWords += newWords;
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+      const record = { date, session, focus, memory, fluency, newWords, reWords, totalWords, time: timestamp };
+      records.push(record);
+      localStorage.setItem(KEY_RECORDS, JSON.stringify(records));
+      localStorage.setItem(KEY_TOTAL, String(totalWords));
+      renderRecords();
+      newWordsInput.value = 0; reWordsInput.value = 0;
+      const notice = document.createElement('div'); notice.className='card'; notice.style.position='fixed'; notice.style.right='12px'; notice.style.bottom='80px'; notice.style.padding='10px'; notice.style.zIndex='9999'; notice.textContent = '✅ 已紀錄：' + timestamp;
+      document.body.appendChild(notice); setTimeout(()=> notice.remove(), 1400);
+    });
+
+    clearBtn.addEventListener('click', function(){
+      if (!confirm('⚠️ 確定要刪除全部紀錄並重置累積生字數嗎？')) return;
+      localStorage.removeItem(KEY_RECORDS);
+      localStorage.removeItem(KEY_TOTAL);
+      records = []; totalWords = 0;
+      studyChart.data.labels = []; studyChart.data.datasets.forEach(ds => ds.data = []); studyChart.update();
+      recordList.innerHTML = '';
+      const notice = document.createElement('div'); notice.className='card'; notice.style.position='fixed'; notice.style.right='12px'; notice.style.bottom='80px'; notice.style.padding='10px'; notice.style.zIndex='9999'; notice.textContent = '🗑️ 已刪除全部紀錄';
+      document.body.appendChild(notice); setTimeout(()=> notice.remove(), 1200);
+    });
+
+    /* -------------------------
+       Event bindings
+    ------------------------- */
+    document.getElementById('markAll').addEventListener('click', ()=>{ if(!confirm('確定要將所有天數標為完成嗎？')) return; planState.days = planState.days.map(()=>true); savePlanState(); renderPlan(searchInput.value.trim()); });
+    document.getElementById('clearAll').addEventListener('click', ()=>{ if(!confirm('確定要重設所有打卡紀錄？')) return; planState.days = planState.days.map(()=>false); savePlanState(); renderPlan(searchInput.value.trim()); });
+    searchInput.addEventListener('input', (e)=> renderPlan(e.target.value.trim()));
+
+    addWordBtn.addEventListener('click', addWord);
+    quickAdd.addEventListener('click', ()=> { inputThai.focus(); });
+    quickExport.addEventListener('click', ()=> exportCsvForDay(Number(selectDay.value)));
+    exportDayCsvBtn.addEventListener('click', ()=> exportCsvForDay(Number(selectDay.value)));
+    exportAllCsvBtn.addEventListener('click', exportCsvAll);
+    showAllWordsBtn.addEventListener('click', ()=>{ /* mobile simplified: toggle all days */ const currently = showAllWordsBtn.textContent === '顯示全部'; showAllWordsBtn.textContent = currently ? '顯示全部' : '顯示單日'; /* keep behavior simple: always show selected day */ renderWordList(); });
+    deleteAllWordsBtn.addEventListener('click', ()=>{ if(!confirm('確定要刪除單字庫中所有單字？此動作無法還原。')) return; wordsState.words = []; saveWordsAccordingToSetting(); renderWordList(); });
+
+    wordSearch.addEventListener('input', ()=> renderWordList());
+    selectDay.addEventListener('change', ()=> renderWordList());
+    clearFormBtn.addEventListener('click', clearForm);
+
     window.addEventListener('storage', (e)=>{
       if(e.key === WORDS_KEY_PLAIN){
         try {
           const obj = JSON.parse(localStorage.getItem(WORDS_KEY_PLAIN) || '{}');
-          if(Array.isArray(obj.words)) { wordsState = obj; renderWordList(); updateWordStats(); }
+          if(Array.isArray(obj.words)) { wordsState = obj; renderWordList(); totalWordsElUpdate(); }
         } catch(e){ /* ignore */ }
-      }
-      if(e.key === WORDS_KEY){
-        // encrypted blob changed; clear plain session to avoid stale data
-        // do not auto-decrypt for security
-        if(!enableEncrypt.checked){
-          // nothing
-        } else {
-          // prompt user to re-enter password if they want to decrypt
-          // do not auto-decrypt
-        }
       }
     });
 
-    // keyboard save shortcut (desktop)
     window.addEventListener('keydown', (e)=>{
       if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){
         e.preventDefault();
@@ -681,23 +787,34 @@
       }
     });
 
-    // initial load: if encrypted blob exists, warn user to decrypt
     (function checkEncryptedOnLoad(){
       const encrypted = localStorage.getItem(WORDS_KEY);
       if(encrypted){
-        // do not auto-decrypt; ask user to enter password
-        alert('偵測到本機有加密的單字資料。若要載入，請在「輸入加密密碼」欄位輸入密碼並按 Enter。');
+        // gentle prompt for mobile
+        if(confirm('偵測到本機有加密的單字資料。要輸入密碼以載入嗎？')) {
+          const p = prompt('請輸入加密密碼（短期）');
+          if(p) decryptWordsWithPassword(p);
+        }
       }
     })();
 
-    // expose some functions for UI
-    window.renderTable = renderTable;
-    window.renderWordList = renderWordList;
-    window.savePlanState = savePlanState;
-    window.saveWordsAccordingToSetting = saveWordsAccordingToSetting;
+    /* -------------------------
+       Init
+    ------------------------- */
+    // populate day select
+    for(let i=1;i<=100;i++){
+      const opt = document.createElement('option'); opt.value = i; opt.textContent = 'Day ' + i;
+      selectDay.appendChild(opt);
+    }
 
-    // start
+    function init(){
+      renderPlan();
+      renderWordList();
+      totalWordsElUpdate();
+      if(planState.lastSaved) lastSavedEl.textContent = '最後儲存：' + new Date(planState.lastSaved).toLocaleString();
+    }
     init();
+  })();
   </script>
 </body>
 </html>
